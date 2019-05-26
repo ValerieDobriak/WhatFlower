@@ -11,6 +11,7 @@ import CoreML
 import Vision
 import Alamofire
 import SwiftyJSON
+import SDWebImage
 
 
 class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
@@ -41,7 +42,7 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
             
             detect(image: convertedCIImage)
             
-        imageView.image = userPickedImage as? UIImage
+        
             
         }
         
@@ -77,7 +78,15 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
 
     func requestInfo(flowerName: String) {
         
-        let parameters : [String:String] = ["format" : "json", "action" : "query", "prop" : "extracts|pageimages", "exintro" : "", "explaintext" : "", "titles" : flowerName, "redirects" : "1", "pithumbsize" : "500", "indexpageids" : ""]
+        let parameters : [String:String] = ["format" : "json",
+                                            "action" : "query",
+                                            "prop" : "extracts|pageimages",
+                                            "exintro" : "", "explaintext" : "",
+                                            "titles" : flowerName,
+                                            "redirects" : "1",
+                                            "pithumbsize" : "500",
+                                            "indexpageids" : ""
+        ]
         
         Alamofire.request(wikipediaURl, method: .get, parameters: parameters).responseJSON { (response) in
             if response.result.isSuccess {
@@ -89,6 +98,10 @@ class ViewController: UIViewController, UIImagePickerControllerDelegate, UINavig
                 let pageid = flowerJSON["query"]["pageids"][0].stringValue
                 
                 let flowerDescription = flowerJSON["query"]["pages"][pageid]["extract"].stringValue
+                
+                let flowerImageURL = flowerJSON["query"]["pages"][pageid]["thumbnail"]["source"].stringValue
+                
+                self.imageView.sd_setImage(with: URL(string: flowerImageURL))
                 
                 self.label.text = flowerDescription
             }
